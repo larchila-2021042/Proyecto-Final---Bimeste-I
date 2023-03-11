@@ -19,6 +19,48 @@ const getProductos = async (req = request, res = response) => {
 
 }
 
+const getProductosAgotados = async (req = request, res = response) => {
+    //condiciones del get
+    const query = { disponible: false };
+    const listaProductos = await Promise.all([
+        Producto.countDocuments(query),
+        Producto.find(query)
+            //.populate('usuario', 'nombre')
+            .populate('usuario', 'correo')
+            .populate('categoria', 'nombre')
+    ]);
+
+    res.json({
+        msg: 'Lista de productos activos',
+        listaProductos
+    });
+
+}
+
+const getProductosMasVendidos = async (req = request, res = response) => {
+    //condiciones del get
+    const { ...body } = req.body;
+    const query = { vendidos: body.vendidos };
+    const listaProductos = await Promise.all([
+        Producto.countDocuments(query),
+        Producto.find(query)
+            //.populate('usuario', 'nombre')
+            .populate('usuario', 'correo')
+            .populate('categoria', 'nombre')
+    ]);
+    if (query > 0) {
+        res.json({
+            msg: 'Lista de productos activos',
+            listaProductos
+        });
+    } else {
+        res.json({
+            msg: 'Lista de productos activos vacia'
+        });
+    }
+
+}
+
 
 const getProductoPorId = async (req = request, res = response) => {
     const { id } = req.params;
@@ -32,7 +74,8 @@ const getProductoPorId = async (req = request, res = response) => {
 
 const postProducto = async (req = request, res = response) => {
     const { estado, usuario, ...body } = req.body;
-    const productoDB = await Producto.findOne({ nombre: body.nombre });
+    const nombre = req.body.nombre.toUpperCase();
+    const productoDB = await Producto.findOne({ nombre });
     //validacion si el producto ya existe
     if (productoDB) {
         return res.status(400).json({
@@ -42,7 +85,7 @@ const postProducto = async (req = request, res = response) => {
     //Generar la data a guardar
     const data = {
         ...body,
-        nombre: body.nombre.toUpperCase(),
+        nombre,
         usuario: req.usuario._id
     }
     const producto = await Producto(data);
@@ -87,5 +130,7 @@ module.exports = {
     putProducto,
     deleteProducto,
     getProductos,
-    getProductoPorId
+    getProductoPorId,
+    getProductosAgotados,
+    getProductosMasVendidos
 }

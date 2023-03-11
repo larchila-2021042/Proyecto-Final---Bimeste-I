@@ -7,8 +7,9 @@ const { existeCategoriaPorId } = require('../helpers/db-validators');
 
 // Middlewares
 const { validarCampos } = require('../middlewares/validar-campos');
+const { eliminarCategoria } = require('../middlewares/validar-categoria');
 const { validarJWT } = require('../middlewares/validar-jwt');
-const { esAdminRole } = require('../middlewares/validar-roles');
+const { esAdminRole, tieneRole } = require('../middlewares/validar-roles');
 
 
 const router = Router();
@@ -29,6 +30,7 @@ router.get('/:id', [
 router.post('/agregar', [
     validarJWT,
     esAdminRole,
+    tieneRole('ADMIN_ROLE'),
     check('nombre', 'El nombre es obligatorio').not().isEmpty(),
     validarCampos
 ] ,postCategoria);
@@ -47,6 +49,7 @@ router.put('/editar/:id', [
 router.delete('/eliminar/:id', [
     validarJWT,
     esAdminRole,
+    eliminarCategoria,
     check('id', 'No es un id de Mongo Válido').isMongoId(),
     check('id').custom( existeCategoriaPorId ),
     //tieneRole('ADMIN_ROLE', 'SUPERADMIN_ROLE', 'COORDINADOR_ROLE'),

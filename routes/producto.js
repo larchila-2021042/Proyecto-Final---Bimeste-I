@@ -7,7 +7,7 @@ const { validarJWT } = require('../middlewares/validar-jwt');
 const { tieneRole, esAdminRole } = require('../middlewares/validar-roles');
 
 //Controllers
-const { postProducto, putProducto, deleteProducto, getProductos, getProductoPorId } = require('../controllers/producto');
+const { postProducto, putProducto, deleteProducto, getProductos, getProductoPorId, getProductosMasVendidos, getProductosAgotados } = require('../controllers/producto');
 
 const { existeProductoPorId } = require('../helpers/db-validators');
 
@@ -16,7 +16,13 @@ const router = Router();
 //Manejo de rutas
 
 //Obtener todas las productos - publico
+router.get('/agotados', getProductosAgotados );
+
+//Obtener todas los productos agotados- publico
 router.get('/', getProductos );
+
+//Obtener todas los productos mas vendidos - publico
+router.get('/masVendidos', getProductosMasVendidos );
 
 //Obtener un producto por id - publico
 router.get('/:id', [

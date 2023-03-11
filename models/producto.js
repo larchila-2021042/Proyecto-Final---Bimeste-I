@@ -17,14 +17,14 @@ const ProductoSchema = Schema({
         required: true
     },
     precio: {
-        type: Number,
-        default: 0
+        type: Number
     },
     categoria: {
         type: Schema.Types.ObjectId,
         ref: 'Categoria',
         required: true
     },
+    vendidos: {type: Number, default: 6},
     descripcion: { type: String },
     disponible: { type: Boolean, default: true },
 

@@ -1,10 +1,11 @@
 const { request, response } = require('express');
+const Usuario = require('../models/usuario');
 
 //Verificador si es admin
 const esAdminRole = (req = request, res = response, next) => {
 
     //Si no viene el usuario
-    if ( !req.usuario ) {
+    if (!req.usuario) {
         return res.status(500).json({
             msg: 'Se require verificar el role sin validar el token primero'
         });
@@ -13,9 +14,9 @@ const esAdminRole = (req = request, res = response, next) => {
     //Verificar que le rol sea ADMIN_ROLE
     const { rol, nombre } = req.usuario;
 
-    if ( rol !== 'ADMIN_ROLE' ) {
+    if (rol !== 'ADMIN_ROLE') {
         return res.status(500).json({
-            msg: `${ nombre } no es Administrador - No tiene acceso a esta función`
+            msg: `${nombre} no es Administrador - No tiene acceso a esta función`
         });
     }
 
@@ -26,9 +27,9 @@ const esAdminRole = (req = request, res = response, next) => {
 
 
 //Operador rest u operador spread 
-const tieneRole = ( ...roles ) => {
+const tieneRole = (...roles) => {
 
-    return (req = request, res= response, next) => {
+    return (req = request, res = response, next) => {
 
         if (!req.usuario) {
             return res.status(500).json({
@@ -36,9 +37,9 @@ const tieneRole = ( ...roles ) => {
             })
         }
 
-        if (!roles.includes( req.usuario.rol)) {
+        if (!roles.includes(req.usuario.rol)) {
             return res.status(401).json({
-                msg: `El servicio requiere uno de estos roles: ${ roles }`
+                msg: `El servicio requiere uno de estos roles: ${roles}`
             })
 
         }
@@ -50,7 +51,30 @@ const tieneRole = ( ...roles ) => {
 }
 
 
+const checkAdminRole = (req = request, res = response, next) => {
+    if (req.usuario.rol === 'ADMIN_ROLE') {
+        if (req.params.id) {
+            Usuario.findById(req.params.id, (err, usuario) => {
+                if (err) {
+                    return next(err);
+                }
+                if (usuario.rol === 'ADMIN_ROLE') {
+                    return res.status(403).json({ message: 'No puedes eliminar a otro admin' });
+                }
+                next();
+            });
+        } else {
+            next();
+        }
+    } else {
+        next();
+    }
+};
+
+
+
 module.exports = {
     tieneRole,
-    esAdminRole
+    esAdminRole,
+    checkAdminRole
 }
